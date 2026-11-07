@@ -1,55 +1,66 @@
-@startuml register return
+@startuml
 title Registrera återlämning
 
 start
 
-repeat :Visar bokningar;
-:Väljer rätt bokning;
-:Visar bokningsuppgifter;
-:Kontrollerar det återlämnade exemplarets skick;
+:Visa vald bokning och bokningsuppgifter;
+:Visa vilket exemplar som ska återlämnas
+och dess inventarienummer;
 
-if (Exemplaret är i godtagbart skick) then(NEJ)
-  fork
-  fork again
-    :Markera exemplaret som otillgängligt;
+if (Finns en pågående uthyrning?) then (JA)
+    :Personal kontrollerar det
+    återlämnade exemplaret;
+else (NEJ)
+    :Visa felmeddelande om att
+    uthyrningen redan är avslutad;
     end
-  end fork
-else (JA)
-  
 endif
 
-:Kontrollerar att inventarienummret på exemplaret stämmer\növerrens med inventarienummret i bokningen;
-
-repeat while (Fel bokning vald) is (JA) not (NEJ)
-
-if (Inventarienummer stämmer överrens med utlämnat exemplar) then(JA)
-  :Bekräftar om återlämningen ska slutföras;
-else(NEJ)
-  :Felmeddelande visas;
-  :Återlämningen avbryts;
-  end
+if (Inventarienummret stämmer) then (JA)
+    :Kontrollen av exemplaret är klar;
+else (NEJ)
+    :Visa felmeddelande om fel exemplar;
+    :Ingen återlämning registreras;
+    end
 endif
 
-if (Återlämningen ska slutföras) then(JA)
-
-  repeat :Kontrollera att personalen är inloggad;
-    backward :Personalen får logga in;
-  repeat while (Är personalen inloggad) is (NEJ) not (JA)
-  
-else(NEJ)
-  :Återlämningen avbryts;
-  end
-  
+if (Exemplaret är i godtagbart skick) then (JA)
+    :Fortsätt återlämningsprocessen;
+else (NEJ)
+    :Anropa separat aktivitetsdiagram:
+    "Markera exemplar som otillgängligt";
+    :Fortsätt återlämningsprocessen
+    efter att otillgängligheten hanterats;
 endif
 
-if (Är exemplaret redan registrerat som återlämnat?) then(NEJ)
-  :Spara återlämninen med koppling till rätt\nexemplar och registrerande personal;
-  :Visa bekräftelse på registrerad återlämning;
-  
-else(JA)
-  :Återlämningen avbryts;
-  end
-  
+:Personal bekräftar återlämningen;
+
+if (Personalen är fortfarande
+inloggad och behörig) then (JA)
+    :Kontrollera att uthyrningen
+    inte redan har avslutats;
+else (NEJ)
+    :Visa felmeddelande om
+    saknad behörighet;
+    end
+endif
+
+if (Uthyrningen är fortfarande aktiv) then (JA)
+    :Registrera återlämningen med koppling
+    till exemplaret och personalen;
+    :Avsluta den pågående uthyrningen;
+    :Behåll det överenskomna bokningspriset;
+else (NEJ)
+    :Visa meddelande om att
+    återlämningen redan registrerats;
+    end
+endif
+
+if (Registreringen sparades) then (JA)
+    :Visa bekräftelse av lyckad registrering av återlämning;
+else (NEJ)
+    :Visa felmeddelande;
+    :Återställ eventuella ofullständiga ändringar;
 endif
 
 stop
