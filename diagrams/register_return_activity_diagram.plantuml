@@ -1,4 +1,4 @@
-@startuml
+@startuml register return
 title Registrera återlämning
 
 start
