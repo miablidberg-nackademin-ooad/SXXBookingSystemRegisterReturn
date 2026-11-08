@@ -7,7 +7,7 @@ start
 :Visa vilket exemplar som ska återlämnas
 och dess inventarienummer;
 
-if (Finns en pågående uthyrning?) then (JA)
+if (Finns en pågående uthyrning när bokningen visas?) then (JA)
     :Personal kontrollerar det
     återlämnade exemplaret;
 else (NEJ)
@@ -45,7 +45,7 @@ else (NEJ)
     end
 endif
 
-if (Uthyrningen är fortfarande aktiv) then (JA)
+if (Är uthyrningen fortfarande aktiv\n när återlämningen ska sparas?) then (JA)
     :Registrera återlämningen med koppling
     till exemplaret och personalen;
     :Avsluta den pågående uthyrningen;
