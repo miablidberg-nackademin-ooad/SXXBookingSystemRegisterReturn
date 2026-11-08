@@ -1,4 +1,4 @@
-@startuml
+@startuml registrer_return
 title Registrera återlämning
 
 start
@@ -16,7 +16,7 @@ else (NEJ)
     end
 endif
 
-if (Inventarienummret stämmer) then (JA)
+if (Inventarienumret stämmer) then (JA)
     :Kontrollen av exemplaret är klar;
 else (NEJ)
     :Visa felmeddelande om fel exemplar;
@@ -27,7 +27,7 @@ endif
 if (Exemplaret är i godtagbart skick) then (JA)
     :Fortsätt återlämningsprocessen;
 else (NEJ)
-    :Anropa separat aktivitetsdiagram:
+    :Genomför separat aktivitetsdiagram:
     "Markera exemplar som otillgängligt";
     :Fortsätt återlämningsprocessen
     efter att otillgängligheten hanterats;
