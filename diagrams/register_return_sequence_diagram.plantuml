@@ -1,0 +1,114 @@
+@startuml register_return_sequence_diagram
+title Registrera återlämning
+
+hide footbox
+autonumber
+
+actor Medarbetare as user
+boundary "Återlämningsformulär" as form
+control "IReturnService" as service
+participant "IBookingRepository" as bookingRepository
+participant "IReturnRepository" as returnRepository
+database "Databas" as database
+
+user -> form : Öppnar vald bokning
+form -> service : GetBookingByIdAsync(id : Guid) : GetBookingRespons
+activate service
+service -> bookingRepository : GetByIdAsync(id : Guid) : Booking
+activate bookingRepository
+bookingRepository -> database : Hämta bokning med id
+activate database
+database --> bookingRepository : Returnerar resultatet av hämtningen
+deactivate database
+
+alt ingen bokning hittas
+bookingRepository --> service : booking : null
+service --> form : returns new GetBookingRespons {\nSuccess = false,\nBooking = null,\nErrorMessage = "Bokningen kunde inte hittas"}
+form --> user : Visa felmeddelande
+
+else bokning hittas
+bookingRepository --> service : booking : Booking
+deactivate bookingRepository
+service -> service : Kontrollerar om bokningen har\nen pågående uthyrning
+
+alt ingen pågående uthyrning
+service --> form : new GetBookingRespons {\nSuccess = false,\nBooking = booking,\nErrorMessage = "Det finns ingen pågående uthyrning"}
+form --> user : Visa felmeddelande
+
+else pågående uthyrning
+service --> form : new GetBookingRespons {\nSuccess = true,\nBooking = booking,\nErrorMessage = null}
+deactivate service
+form --> user : Visa vald bokning
+
+user -> form : Fyller i inventarienumret på\nexemplaret som ska återlämnas
+form -> form : Kontrollerar att inventarienumret\nstämmer med det i bokningen
+
+alt fel inventarienummer
+form -> user : Visa felmeddelande 
+
+else inventarienummer stämmer
+user -> user : Kontrollerar exemplarets skick
+
+alt exemplaret är inte i godtagbart skick
+user -> form : Väljer att gå till formulär för att\nmarkera exemplar som otillgängligt
+end
+
+user -> form : Väljer att registrera återlämningen
+form -> service : RegisterReturnAsync(bookingId : Guid,\ninventoryNumber : string)
+activate service
+service -> service : Kontrollerar att personalen är\ninloggad och behörig
+
+alt personal inte inloggad
+service --> form : new RegisterReturnRespons {\nSuccess = false,\nErrorMessage = "Utloggad, logga in igen för att fortsätta"}
+
+else personal saknar behörighet
+service --> form : new RegisterReturnRespons {\nSuccess = false,\nErrorMessage = "Saknar behörighet att registrera återlämning"}
+form --> user : Visa felmeddelande
+
+else personal är behörig
+service -> service : Kontrollerar att uthyrningen fortfarande är aktiv
+
+alt uthyrningen är inte aktiv
+service --> form : new RegisterReturnRespons {\nSuccess = false,\nErrorMessage = "Uthyrningen är redan avslutad"}
+form --> user : Visa felmeddelande
+
+else uthyrningen är aktiv
+service -> service : new Return(bookingId, inventoryNumber, userId)
+service -> returnRepository : AddAsync(return : Return)
+activate returnRepository
+returnRepository -> database : Spara återlämning i databasen
+activate database
+database --> returnRepository : Resultatet av sparandet
+deactivate database
+
+alt registreringen misslyckades
+returnRepository --> service : return : false
+service --> form : new RegisterReturnRespons {\nSuccess = false,\nErrorMessage = "Registreringen av återlämningen misslyckades"}
+form --> user : Visa felmeddelande
+
+else registreringen lyckades
+returnRepository --> service : return : true
+deactivate returnRepository
+
+service -> bookingRepository : UpdateAsync(booking : Booking)
+activate bookingRepository
+bookingRepository -> database : Uppdatera bokningen i databasen
+
+activate database
+database --> bookingRepository : Resultatet av uppdateringen
+deactivate database
+
+alt uppdateringen misslyckades
+bookingRepository --> service : return : false
+service --> form : new RegisterReturnRespons {\nSuccess = false,\nErrorMessage = "Uppdateringen av bokningen misslyckades"}
+form --> user : Visa felmeddelande
+
+else uppdateringen lyckades
+bookingRepository --> service : return : true
+deactivate bookingRepository
+service --> form : new RegisterReturnRespons {\nSuccess = true,\nErrorMessage = null}
+deactivate service
+form --> user : Visa bekräftelse av lyckad registrering
+end
+
+@enduml
