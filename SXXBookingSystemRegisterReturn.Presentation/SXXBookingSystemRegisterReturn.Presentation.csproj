@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SXXBookingSystemRegisterReturn.Application\SXXBookingSystemRegisterReturn.Application.csproj" />
+    <ProjectReference Include="..\SXXBookingSystemRegisterReturn.Repository\SXXBookingSystemRegisterReturn.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

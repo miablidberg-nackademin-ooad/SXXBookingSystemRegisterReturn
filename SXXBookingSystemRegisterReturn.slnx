@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="SXXBookingSystemRegisterReturn.Application/SXXBookingSystemRegisterReturn.Application.csproj" Id="e5860fe0-55d2-4909-9676-629cbe74d4c8" />
+  <Project Path="SXXBookingSystemRegisterReturn.Domain/SXXBookingSystemRegisterReturn.Domain.csproj" Id="5f3e0239-71e6-4fbb-947c-20ac6c77ded9" />
   <Project Path="SXXBookingSystemRegisterReturn.Presentation/SXXBookingSystemRegisterReturn.Presentation.csproj" />
+  <Project Path="SXXBookingSystemRegisterReturn.Repository/SXXBookingSystemRegisterReturn.Repository.csproj" Id="0f87bbd2-ad9c-4fe5-ab98-1bfe2f57555d" />
+  <Project Path="SXXBookingSystemRegisterReturn.Test/SXXBookingSystemRegisterReturn.Test.csproj" Id="43c0a644-219d-4b6f-b805-d7c3e15e1b12" />
 </Solution>
