@@ -1,4 +1,5 @@
 ﻿using SXXBookingSystemRegisterReturn.Domain.Enums;
+using SXXBookingSystemRegisterReturn.Domain.Helpers;
 
 namespace SXXBookingSystemRegisterReturn.Domain.Models;
 
@@ -12,14 +13,15 @@ public class Booking
     public DateOnly ReservedThrough { get; set; }
     public decimal AgreedDailyPrice { get; set; }
     public decimal AgreedTotalPrice { get; set; }
+    public string InventoryNumber { get; set; }
     public BookingStatus Status { get; set; }
     public Guid CustomerId { get; set; }
 
     public Booking() { }
 
-    public Booking(Guid bookingId, string bookingNumber, DateTime createdAt, DateOnly startDate, DateOnly endDate, DateOnly reservedThrough, decimal agreedDailyPrice, decimal agreedTotalPrice, BookingStatus status, Guid customerId)
+    public Booking(Guid bookingId, string bookingNumber, DateTime createdAt, DateOnly startDate, DateOnly endDate, DateOnly reservedThrough, decimal agreedDailyPrice, decimal agreedTotalPrice, string inventoryNumber, BookingStatus status, Guid customerId)
     {
-        BookingId = ValidateId(bookingId);
+        BookingId = Validation.ValidateId(bookingId, "bokningen");
         BookingNumber = ValidateAndNormalizeBookingNumber(bookingNumber);
         CreatedAt = createdAt;
         StartDate = startDate;
@@ -27,18 +29,9 @@ public class Booking
         ReservedThrough = reservedThrough;
         AgreedDailyPrice = ValidatePrice(agreedDailyPrice);
         AgreedTotalPrice = ValidatePrice(agreedTotalPrice);
+        InventoryNumber = Validation.ValidateAndNormalizeInventoryNumber(inventoryNumber);
         Status = ValidateStatus(status);
-        CustomerId = ValidateId(customerId);
-    }
-
-    private static Guid ValidateId(Guid bookingId)
-    {
-        if (bookingId == Guid.Empty)
-        {
-            throw new ArgumentException("Bokningen måste ha ett ID.", nameof(bookingId));
-        }
-
-        return bookingId;
+        CustomerId = Validation.ValidateId(customerId, "kunden");
     }
 
     private static string ValidateAndNormalizeBookingNumber(string bookingNumber)
@@ -63,7 +56,7 @@ public class Booking
         return endDate;
     }
 
-    private decimal ValidatePrice(decimal agreedPrice)
+    private static decimal ValidatePrice(decimal agreedPrice)
     {
         if (agreedPrice < 0)
         {
@@ -73,7 +66,7 @@ public class Booking
         return agreedPrice;
     }
 
-    private BookingStatus ValidateStatus(BookingStatus status)
+    private static BookingStatus ValidateStatus(BookingStatus status)
     {
         if (Enum.IsDefined(status))
         {

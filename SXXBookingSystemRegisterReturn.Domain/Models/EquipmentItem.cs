@@ -1,17 +1,31 @@
-﻿namespace SXXBookingSystemRegisterReturn.Domain.Models;
+﻿using SXXBookingSystemRegisterReturn.Domain.Helpers;
+
+namespace SXXBookingSystemRegisterReturn.Domain.Models;
 
 public class EquipmentItem
 {
-    public string InventoryItem { get; set; }
+    public string InventoryNumber { get; set; }
     public string ArticleNumber { get; set; }
     public bool IsAvailable { get; set; }
 
     public EquipmentItem() { }
 
-    public EquipmentItem(string inventoryItem, string articleNumber, bool isAvailable)
+    public EquipmentItem(string inventoryNumber, string articleNumber, bool isAvailable)
     {
-        InventoryItem = inventoryItem;
-        ArticleNumber = articleNumber;
+        InventoryNumber = Validation.ValidateAndNormalizeInventoryNumber(inventoryNumber);
+        ArticleNumber = ValidateAndNormalizeArticleNumber(articleNumber);
         IsAvailable = isAvailable;
+    }
+
+    private static string ValidateAndNormalizeArticleNumber(string articleNumber)
+    {
+        if (!string.IsNullOrWhiteSpace(articleNumber))
+        {
+            throw new ArgumentException("Artikelnummer måste finnas.", nameof(articleNumber));
+        }
+
+        string normalizedInventoryNumber = articleNumber.Trim();
+
+        return normalizedInventoryNumber;
     }
 }

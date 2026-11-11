@@ -1,4 +1,6 @@
-﻿namespace SXXBookingSystemRegisterReturn.Domain.Models;
+﻿using SXXBookingSystemRegisterReturn.Domain.Helpers;
+
+namespace SXXBookingSystemRegisterReturn.Domain.Models;
 
 public class Return
 {
@@ -12,10 +14,10 @@ public class Return
 
     public Return(Guid returnId, Guid bookingId, string inventoryNumber, DateOnly returnDate, Guid staffId)
     {
-        ReturnId = returnId;
-        BookingId = bookingId;
-        InventoryNumber = inventoryNumber;
+        ReturnId = Validation.ValidateId(returnId, "återlämningen");
+        BookingId = Validation.ValidateId(bookingId, "bokningen");
+        InventoryNumber = Validation.ValidateAndNormalizeInventoryNumber(inventoryNumber);
         ReturnDate = returnDate;
-        StaffId = staffId;
+        StaffId = Validation.ValidateId(staffId, "registrerande personal");
     }
 }
