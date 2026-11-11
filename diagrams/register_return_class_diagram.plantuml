@@ -17,7 +17,7 @@ class Booking {
     +CustomerId : Guid
 
     +Booking()
-    +Booking(bookingId : Guid, bookingNumber : string, createdAt : DateTime, startDate : DateOnly, endDate : DateOnly,\n\treservedThrough : DateOnly, agreedDailyPrice : decimal, agreedTotalPrice : decimal,\n\tinventoryNumber : string,nstatus : BookingStatus, customerId : Guid)
+    +Booking(bookingId : Guid, bookingNumber : string, createdAt : DateTime, startDate : DateOnly, endDate : DateOnly,\n\treservedThrough : DateOnly, agreedDailyPrice : decimal, agreedTotalPrice : decimal,\n\tinventoryNumber : string, status : BookingStatus, customerId : Guid)
 
     -ValidateAndNormalizeBookingNumber(string bookingNumber) : string
     -ValidateEndDate(DateOnly endDate) : DateOnly
@@ -42,9 +42,9 @@ class EquipmentItem {
     +IsAvailable : bool
 
     +EquipmentItem()
-    +EquipmentItem(inventoryNumber : string, articleNumber : string, isAvailable : bool
+    +EquipmentItem(inventoryNumber : string, articleNumber : string, isAvailable : bool)
 
-    +ValidateAndNormalizeArticleNumber(string articleNumber) : string
+    -ValidateAndNormalizeArticleNumber(string articleNumber) : string
 }
 
 class Validation {
@@ -74,13 +74,13 @@ interface IEquipmentItemRepository {
 
 interface IReturnService {
     +GetBookingByIdAsync(Guid bookingId) : Task<GetBookingResponse>
-    +CheckInventoryNumberAsync(string inventoryNumber, Booking booking, Guid staffId) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(Booking booking, string inventoryNumber) : Task<RegisterReturnResponse>
+    +CheckInventoryNumberAsync(string inventoryNumber, Booking booking) : Task<CheckInventoryNumberResponse>
+    +RegisterReturnAsync(Booking booking, string inventoryNumber, Guid staffId) : Task<RegisterReturnResponse>
 }
 
 class ReturnService {
-    -_bookingRepository : IBookingRepository
     -_returnRepository : IReturnRepository
+    -_bookingRepository : IBookingRepository
     -_equipmentItemRepository : IEquipmentItemRepository
 
     +ReturnService(bookingRepository : IBookingRepository, returnRepository : IReturnRepository, equipmentItemRepository : IEquipmentItemRepository)

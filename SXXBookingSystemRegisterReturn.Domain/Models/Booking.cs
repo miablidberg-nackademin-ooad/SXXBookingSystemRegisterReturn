@@ -38,7 +38,7 @@ public class Booking
 
     private static string ValidateAndNormalizeBookingNumber(string bookingNumber)
     {
-        if (!string.IsNullOrWhiteSpace(bookingNumber))
+        if (string.IsNullOrWhiteSpace(bookingNumber))
         {
             throw new ArgumentException("Bokningen måste ha ett bokningsnummer.", nameof(bookingNumber));
         }
@@ -70,7 +70,7 @@ public class Booking
 
     private static BookingStatus ValidateStatus(BookingStatus status)
     {
-        if (Enum.IsDefined(status))
+        if (!Enum.IsDefined(status))
         {
             throw new ArgumentException("Ogiltig status för bokningen.", nameof(status));
         }

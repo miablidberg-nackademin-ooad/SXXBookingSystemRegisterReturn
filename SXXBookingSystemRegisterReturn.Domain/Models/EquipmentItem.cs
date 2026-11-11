@@ -19,7 +19,7 @@ public class EquipmentItem
 
     private static string ValidateAndNormalizeArticleNumber(string articleNumber)
     {
-        if (!string.IsNullOrWhiteSpace(articleNumber))
+        if (string.IsNullOrWhiteSpace(articleNumber))
         {
             throw new ArgumentException("Artikelnummer måste finnas.", nameof(articleNumber));
         }

@@ -3,6 +3,6 @@
     public record RegisterReturnResponse
     (
         bool Success,
-        string? ErrorMessge
+        string? ErrorMessage
     );
 }

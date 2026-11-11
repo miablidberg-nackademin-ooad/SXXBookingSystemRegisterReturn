@@ -28,7 +28,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
         return new GetBookingResponse(true, booking, null);
     }
 
-    public static async Task<CheckInventoryNumberResponse> CheckInventoryNumberAsync(string inventoryNumber, Booking booking)
+    public async Task<CheckInventoryNumberResponse> CheckInventoryNumberAsync(string inventoryNumber, Booking booking)
     {
         try
         {
@@ -49,7 +49,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
         }
     }
 
-    public async Task<RegisterReturnResponse> RegisterReturn(Booking booking, string inventoryNumber, Guid staffId)
+    public async Task<RegisterReturnResponse> RegisterReturnAsync(Booking booking, string inventoryNumber, Guid staffId)
     {
         Return returnToAdd;
 
