@@ -19,10 +19,10 @@ class Booking {
     +Booking()
     +Booking(bookingId : Guid, bookingNumber : string, createdAt : DateTime, startDate : DateOnly, endDate : DateOnly,\n\treservedThrough : DateOnly, agreedDailyPrice : decimal, agreedTotalPrice : decimal,\n\tinventoryNumber : string, status : BookingStatus, customerId : Guid)
 
-    -ValidateAndNormalizeBookingNumber(string bookingNumber) : string
-    -ValidateEndDate(DateOnly endDate) : DateOnly
-    -ValidatePrice(decimal agreedPrice) : decimal
-    -ValidateStatus(BookingStatus status) : BookingStatus
+    -{static} ValidateAndNormalizeBookingNumber(bookingNumber : string) : string
+    -ValidateEndDate(endDate : DateOnly) : DateOnly
+    -{static} ValidatePrice(agreedPrice : decimal) : decimal
+    -{static} ValidateStatus(status : BookingStatus) : BookingStatus
 }
 
 class Return {
@@ -44,12 +44,12 @@ class EquipmentItem {
     +EquipmentItem()
     +EquipmentItem(inventoryNumber : string, articleNumber : string, isAvailable : bool)
 
-    -ValidateAndNormalizeArticleNumber(string articleNumber) : string
+    -{static} ValidateAndNormalizeArticleNumber(articleNumber : string) : string
 }
 
 class Validation {
-    +ValidateAndNormalizeInventoryNumber(string inventoryNumber) : string
-    +ValidateId(Guid id, string value) : Guid
+    +{static} ValidateAndNormalizeInventoryNumber(inventoryNumber : string) : string
+    +{static} ValidateId(id : Guid, value : string) : Guid
 }
 
 enum BookingStatus {
@@ -68,14 +68,14 @@ interface IReturnRepository {
 }
 
 interface IEquipmentItemRepository {
-    +GetByEquipmentItemByInventoryNumberAsync(inventoryNumber : string) : Task<EquipmentItem>
+    +GetEquipmentItemByInventoryNumberAsync(inventoryNumber : string) : Task<EquipmentItem>
     +UpdateAsync(equipmentItem : EquipmentItem) : Task<bool>
 }
 
 interface IReturnService {
-    +GetBookingByIdAsync(Guid bookingId) : Task<GetBookingResponse>
-    +CheckInventoryNumberAsync(string inventoryNumber, Booking booking) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(Booking booking, string inventoryNumber, Guid staffId) : Task<RegisterReturnResponse>
+    +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
+    +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking) : Task<CheckInventoryNumberResponse>
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
 }
 
 class ReturnService {
@@ -83,15 +83,15 @@ class ReturnService {
     -_bookingRepository : IBookingRepository
     -_equipmentItemRepository : IEquipmentItemRepository
 
-    +ReturnService(bookingRepository : IBookingRepository, returnRepository : IReturnRepository, equipmentItemRepository : IEquipmentItemRepository)
+    +ReturnService(returnRepository : IReturnRepository, bookingRepository : IBookingRepository, equipmentItemRepository : IEquipmentItemRepository)
 
-    +GetBookingByIdAsync(Guid bookingId) : Task<GetBookingResponse>
-    +CheckInventoryNumberAsync(string inventoryNumber, Booking booking, Guid staffId) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(Booking booking, string inventoryNumber) : Task<RegisterReturnResponse>
-    -CreateReturnObject(Booking booking, string inventoryNumber, Guid staffId) : Return
-    -GenerateNewId() : Guid
-    -UpdateBooking(Booking booking) : Booking
-    -UpdateEquipmentItem(EquipmentItem equipmentItem) : EquipmentItem
+    +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
+    +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking, staffId : Guid) : Task<CheckInventoryNumberResponse>
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
+    -CreateReturnObject(booking : Booking, inventoryNumber : string, staffId : Guid) : Return
+    -{static} GenerateNewId() : Guid
+    -{static} UpdateBooking(booking : Booking) : Booking
+    -{static} UpdateEquipmentItem(equipmentItem : EquipmentItem) : EquipmentItem
 }
 
 record GetBookingResponse {
@@ -111,8 +111,8 @@ record RegisterReturnResponse {
 }
 
 Return -> "1" Booking : <<uses>>
-Booking --> "1" BookingStatus : <<uses>>
-Booking --> "1" EquipmentItem : <<uses>>
+Booking --> BookingStatus : <<uses>>
+Booking --> EquipmentItem : <<uses>>
 Booking --> Validation : <<uses>>
 Return --> Validation : <<uses>>
 EquipmentItem --> Validation : <<uses>>
