@@ -4,8 +4,8 @@ namespace SXXBookingSystemRegisterReturn.Domain.Models;
 
 public class EquipmentItem
 {
-    public string InventoryNumber { get; set; }
-    public string ArticleNumber { get; set; }
+    public string InventoryNumber { get; private set; }
+    public string ArticleNumber { get; private set; }
     public bool IsAvailable { get; set; }
 
     public EquipmentItem() { }

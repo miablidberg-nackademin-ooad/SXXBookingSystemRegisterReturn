@@ -1,6 +1,6 @@
 ﻿namespace SXXBookingSystemRegisterReturn.Domain.Helpers;
 
-internal class Validation
+public class Validation
 {
     public static string ValidateAndNormalizeInventoryNumber(string inventoryNumber)
     {

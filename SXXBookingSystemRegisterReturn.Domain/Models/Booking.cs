@@ -6,20 +6,22 @@ namespace SXXBookingSystemRegisterReturn.Domain.Models;
 public class Booking
 {
     public Guid BookingId { get; private set; }
-    public string BookingNumber { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateOnly StartDate { get; set; }
-    public DateOnly EndDate { get; set; }
+    public string BookingNumber { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
     public DateOnly ReservedThrough { get; set; }
-    public decimal AgreedDailyPrice { get; set; }
-    public decimal AgreedTotalPrice { get; set; }
-    public string InventoryNumber { get; set; }
+    public decimal AgreedDailyPrice { get; private set; }
+    public decimal AgreedTotalPrice { get; private set; }
+    public string InventoryNumber { get; private set; }
     public BookingStatus Status { get; set; }
-    public Guid CustomerId { get; set; }
+    public Guid CustomerId { get; private set; }
 
     public Booking() { }
 
-    public Booking(Guid bookingId, string bookingNumber, DateTime createdAt, DateOnly startDate, DateOnly endDate, DateOnly reservedThrough, decimal agreedDailyPrice, decimal agreedTotalPrice, string inventoryNumber, BookingStatus status, Guid customerId)
+    public Booking(Guid bookingId, string bookingNumber, DateTime createdAt, DateOnly startDate, 
+        DateOnly endDate, DateOnly reservedThrough, decimal agreedDailyPrice, decimal agreedTotalPrice, 
+        string inventoryNumber, BookingStatus status, Guid customerId)
     {
         BookingId = Validation.ValidateId(bookingId, "bokningen");
         BookingNumber = ValidateAndNormalizeBookingNumber(bookingNumber);

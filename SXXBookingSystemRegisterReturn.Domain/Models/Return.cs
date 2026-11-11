@@ -4,11 +4,11 @@ namespace SXXBookingSystemRegisterReturn.Domain.Models;
 
 public class Return
 {
-    public Guid ReturnId { get; set; }
-    public Guid BookingId { get; set; }
-    public string InventoryNumber { get; set; }
-    public DateOnly ReturnDate { get; set; }
-    public Guid StaffId { get; set; }
+    public Guid ReturnId { get; private set; }
+    public Guid BookingId { get; private set; }
+    public string InventoryNumber { get; private set; }
+    public DateOnly ReturnDate { get; private set; }
+    public Guid StaffId { get; private set; }
 
     public Return() { }
 
