@@ -28,13 +28,13 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
         return new GetBookingResponse(true, booking, null);
     }
 
-    public async Task<CheckInventoryNumberResponse> CheckInventoryNumberAsync(string inventoryNumber, Booking booking)
+    public CheckInventoryNumberResponse CheckInventoryNumber(string inventoryNumber, Booking booking)
     {
         try
         {
             string normalizedInventoryNumber = Validation.ValidateAndNormalizeInventoryNumber(inventoryNumber);
 
-            if (inventoryNumber.Equals(booking.InventoryNumber))
+            if (normalizedInventoryNumber.Equals(booking.InventoryNumber))
             {
                 return new CheckInventoryNumberResponse(true, null);
             }
