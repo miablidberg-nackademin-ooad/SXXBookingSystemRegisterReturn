@@ -49,7 +49,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
         }
     }
 
-    public async Task<RegisterReturnResponse> RegisterReturnAsync(Booking booking, string inventoryNumber, Guid staffId)
+    public async Task<RegisterReturnResponse> RegisterReturnAsync(Booking booking, string inventoryNumber, Guid staffId, bool isAvailable)
     {
         Return returnToAdd;
 
@@ -78,7 +78,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
                 return new RegisterReturnResponse(false, $"Utrustningsexemplar med inventarienummer '{inventoryNumber}' kunde inte hittas.");
             }
 
-            EquipmentItem updatedEquipmentItem = UpdateEquipmentItem(equipmentItem);
+            EquipmentItem updatedEquipmentItem = UpdateEquipmentItem(equipmentItem, isAvailable);
             bool equipmentItemUpdateSuccess = await _equipmentItemRepository.UpdateAsync(updatedEquipmentItem);
 
             if (!equipmentItemUpdateSuccess)
@@ -114,9 +114,9 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
         return booking;
     }
 
-    private static EquipmentItem UpdateEquipmentItem(EquipmentItem equipmentItem)
+    private static EquipmentItem UpdateEquipmentItem(EquipmentItem equipmentItem, bool isAvailable)
     {
-        equipmentItem.IsAvailable = true;
+        equipmentItem.IsAvailable = isAvailable;
 
         return equipmentItem;
     }

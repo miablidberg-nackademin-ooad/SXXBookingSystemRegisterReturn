@@ -75,7 +75,7 @@ interface IEquipmentItemRepository {
 interface IReturnService {
     +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
     +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid, isAvailable : bool) : Task<RegisterReturnResponse>
 }
 
 class ReturnService {
@@ -87,11 +87,11 @@ class ReturnService {
 
     +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
     +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking, staffId : Guid) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid, isAvailable : bool) : Task<RegisterReturnResponse>
     -CreateReturnObject(booking : Booking, inventoryNumber : string, staffId : Guid) : Return
     -{static} GenerateNewId() : Guid
     -{static} UpdateBooking(booking : Booking) : Booking
-    -{static} UpdateEquipmentItem(equipmentItem : EquipmentItem) : EquipmentItem
+    -{static} UpdateEquipmentItem(equipmentItem : EquipmentItem, isAvailable : bool) : EquipmentItem
 }
 
 record GetBookingResponse {
