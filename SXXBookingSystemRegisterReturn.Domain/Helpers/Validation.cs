@@ -1,10 +1,10 @@
 ﻿namespace SXXBookingSystemRegisterReturn.Domain.Helpers;
 
-internal class Validation
+public class Validation
 {
     public static string ValidateAndNormalizeInventoryNumber(string inventoryNumber)
     {
-        if (!string.IsNullOrWhiteSpace(inventoryNumber))
+        if (string.IsNullOrWhiteSpace(inventoryNumber))
         {
             throw new ArgumentException("Inventarienummer måste finnas.", nameof(inventoryNumber));
         }
