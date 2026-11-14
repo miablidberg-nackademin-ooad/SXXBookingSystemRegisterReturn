@@ -1,4 +1,5 @@
 ﻿using SXXBookingSystemRegisterReturn.Application.Dtos;
+using SXXBookingSystemRegisterReturn.Domain.Enums;
 using SXXBookingSystemRegisterReturn.Domain.Helpers;
 using SXXBookingSystemRegisterReturn.Domain.Interfaces;
 using SXXBookingSystemRegisterReturn.Domain.Models;
@@ -15,10 +16,10 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
     {
         if (bookingId == Guid.Empty)
         {
-            return new GetBookingResponse(false, null, $"Bokningen med id '{bookingId}' kunde inte hittas.");
+            return new GetBookingResponse(false, null, $"Ange ett bokningsnummer.");
         }
 
-        Booking booking = await _bookingRepository.GetByIdAsync(bookingId);
+        Booking? booking = await _bookingRepository.GetByIdAsync(bookingId);
 
         if (booking is null)
         {
@@ -53,6 +54,15 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
     {
         Return returnToAdd;
 
+        if (booking.Status != BookingStatus.Confirmed)
+        {
+            return new RegisterReturnResponse(false, "Uthyrningen är redan avslutad.");
+        }
+        else if (!CheckInventoryNumber(inventoryNumber, booking).Success)
+        {
+            return new RegisterReturnResponse(false, "Inventarienumret stämmer inte med bokningens inventarienummer.");
+        }
+
         try
         {
             returnToAdd = CreateReturnObject(booking, inventoryNumber, staffId);
@@ -60,7 +70,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
 
             if (!addSuccess)
             {
-                return new RegisterReturnResponse(false, "Återlämningen kunde inte sparas.");
+                return new RegisterReturnResponse(false, "Registreringen av återlämningen misslyckades.");
             }
 
             Booking updatedBooking = UpdateBooking(booking);
@@ -68,7 +78,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
 
             if (!bookingUpdateSuccess)
             {
-                return new RegisterReturnResponse(false, "Bokningen kunde inte uppdateras.");
+                return new RegisterReturnResponse(false, "Uppdateringen av bokningen misslyckades.");
             }
 
             EquipmentItem equipmentItem = await _equipmentItemRepository.GetEquipmentItemByInventoryNumberAsync(inventoryNumber);
@@ -83,7 +93,7 @@ public class ReturnService(IReturnRepository returnRepository, IBookingRepositor
 
             if (!equipmentItemUpdateSuccess)
             {
-                return new RegisterReturnResponse(false, "Utrustningsexemplaret kunde inte uppdateras.");
+                return new RegisterReturnResponse(false, "Uppdateringen av utrustningsexemplaret misslyckades.");
             }
 
             return new RegisterReturnResponse(true, null);

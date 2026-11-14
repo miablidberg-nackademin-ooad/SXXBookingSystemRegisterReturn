@@ -3,7 +3,7 @@ using SXXBookingSystemRegisterReturn.Domain.Models;
 
 namespace SXXBookingSystemRegisterReturn.Application.Services;
 
-internal interface IReturnService
+public interface IReturnService
 {
     public Task<GetBookingResponse> GetBookingByIdAsync(Guid bookingId);
     public CheckInventoryNumberResponse CheckInventoryNumber(string inventoryNumber, Booking booking);
