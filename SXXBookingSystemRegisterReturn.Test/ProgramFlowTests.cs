@@ -75,7 +75,8 @@ public class ProgramFlowTests
             returnToAdd.ReturnId != Guid.Empty &&
             returnToAdd.BookingId == bookingId &&
             returnToAdd.InventoryNumber.Equals(inventoryNumber) &&
-            returnToAdd.ReturnDate == DateOnly.FromDateTime(DateTime.Now)));
+            returnToAdd.ReturnDate == DateOnly.FromDateTime(DateTime.Now) &&
+            returnToAdd.StaffId == staffId));
     }
 
     [Fact]
@@ -316,11 +317,12 @@ public class ProgramFlowTests
             returnToAdd.ReturnId != Guid.Empty &&
             returnToAdd.BookingId == bookingId &&
             returnToAdd.InventoryNumber.Equals(inventoryNumber) &&
-            returnToAdd.ReturnDate == DateOnly.FromDateTime(DateTime.Now)));
+            returnToAdd.ReturnDate == DateOnly.FromDateTime(DateTime.Now) &&
+            returnToAdd.StaffId == staffId));
     }
 
     [Fact]
-    public async Task NoBookingFound_Should_ReturnErrorMessage()
+    public async Task GetBookingByIdAsync_BookingNotFound_Should_ReturnErrorMessage()
     {
         // Arrange
         Guid bookingId = Guid.NewGuid();
