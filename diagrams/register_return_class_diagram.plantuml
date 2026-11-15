@@ -2,6 +2,7 @@
 title Registrera återlämning
 
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 class Booking {
     +BookingId : Guid
