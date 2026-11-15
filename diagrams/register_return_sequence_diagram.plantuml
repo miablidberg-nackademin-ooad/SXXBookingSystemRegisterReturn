@@ -1,20 +1,21 @@
 @startuml register_return_sequence_diagram
 title Registrera återlämning
 
-hide footbox
 autonumber
 
 actor Medarbetare as user
 boundary "Återlämningsformulär" as form
-control "IReturnService" as service
+control "IReturnService" as returnService
+control "ILoginService" as loginService
 participant "IBookingRepository" as bookingRepository
 participant "IReturnRepository" as returnRepository
+participant "IEquipmentItemRepository" as equipmentRepository
 database "Databas" as database
 
 user -> form : Öppnar vald bokning
-form -> service : GetBookingByIdAsync(id : Guid) : GetBookingResponse
-activate service
-service -> bookingRepository : GetByIdAsync(id : Guid) : Booking
+form -> returnService : GetBookingByIdAsync(id : Guid) : GetBookingResponse
+activate returnService
+returnService -> bookingRepository : GetByIdAsync(id : Guid) : Booking
 activate bookingRepository
 bookingRepository -> database : Hämta bokning med id
 activate database
@@ -22,35 +23,33 @@ database --> bookingRepository : Returnerar resultatet av hämtningen
 deactivate database
 
 alt ingen bokning hittas
-bookingRepository --> service : booking : null
-service --> form : returns new GetBookingResponse {\nSuccess = false,\nBooking = null,\nErrorMessage = "Bokningen kunde inte hittas"}
+bookingRepository --> returnService : booking : null
+returnService --> form : returns new GetBookingResponse {\nSuccess = false,\nBooking = null,\nErrorMessage = "$"Bokningen med id '{bookingId}' kunde inte hittas."}
 form --> user : Visa felmeddelande
 
 else bokning hittas
-bookingRepository --> service : booking : Booking
+bookingRepository --> returnService : booking : Booking
 deactivate bookingRepository
-service -> service : Kontrollerar om bokningen har\nen pågående uthyrning
+returnService --> form : new GetBookingResponse {\nSuccess = true,\nBooking = booking,\nErrorMessage = null}
+deactivate returnService
 
-alt ingen pågående uthyrning
-service --> form : new GetBookingResponse {\nSuccess = false,\nBooking = booking,\nErrorMessage = "Det finns ingen pågående uthyrning"}
-form --> user : Visa felmeddelande
+alt bokningen är inte aktiv
+form --> user : Visa vald bokning & felmeddelande "Bokningen är redan avslutad."
 
-else pågående uthyrning
-service --> form : new GetBookingResponse {\nSuccess = true,\nBooking = booking,\nErrorMessage = null}
-deactivate service
+else bokningen är aktiv
 form --> user : Visa vald bokning
 
 user -> form : Fyller i inventarienumret på\nexemplaret som ska återlämnas
-form -> service : CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking)\n: CheckInventoryNumberResponse
-activate service
+form -> returnService : CheckInventoryNumber(inventoryNumber : string, booking : Booking)\n: CheckInventoryNumberResponse
+activate returnService
 
 alt fel inventarienummer
-service --> form : new CheckInventoryNumberResponse {\nSuccess = false,\nErrorMessage = "Inventarienumret stämmer inte"}
+returnService --> form : new CheckInventoryNumberResponse {\nSuccess = false,\nErrorMessage = "Fel inventarienummer på det återlämnade exemplaret jämfört med bokningen."}
 form -> user : Visa felmeddelande 
 
 else inventarienummer stämmer
-service --> form : new CheckInventoryNumberResponse {\nSuccess = true,\nErrorMessage = null}
-deactivate service
+returnService --> form : new CheckInventoryNumberResponse {\nSuccess = true,\nErrorMessage = null}
+deactivate returnService
 
 user -> form : Anger om exemplaret är i godtagbart skick
 
@@ -61,28 +60,33 @@ alt exemplaret är inte i godtagbart skick
 end
 
 user -> form : Väljer att registrera återlämningen
-form -> service : RegisterReturnAsync(bookingId : Guid,\ninventoryNumber : string)\n: RegisterReturnResponse
-activate service
-service -> service : Kontrollerar att personalen är\ninloggad och behörig
+form -> loginService : Kontrollerar att personalen är\ninloggad och behörig
+activate loginService
 
 alt personal är inte inloggad
-service --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Utloggad, logga in igen för att fortsätta"}
+loginService --> form : Felmeddelande: "Utloggad, logga in igen för att fortsätta"
 
 else personal saknar behörighet
-service --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Saknar behörighet att registrera återlämning"}
+loginService --> form : Felmeddelande: "Saknar behörighet att registrera återlämning"
 form --> user : Visa felmeddelande
 
 else personal är behörig
-service -> service : Kontrollerar att uthyrningen fortfarande är aktiv
+loginService --> form : Personal är behörig
+deactivate loginService
+
+form -> returnService : RegisterReturnAsync(booking : Booking,\ninventoryNumber : string,\nstaffId : Guid, IsAvailable : bool)\n: RegisterReturnResponse
+activate returnService
+
+returnService -> returnService : Kontrollerar att uthyrningen fortfarande är aktiv
 
 alt uthyrningen är inte aktiv
-service --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Uthyrningen är redan avslutad"}
+returnService --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Uthyrningen är redan avslutad."}
 form --> user : Visa felmeddelande
 
 else uthyrningen är aktiv
-service -> service : new Return(bookingId, inventoryNumber, employeeId)
-service -> database : BeginTransaction
-service -> returnRepository : AddAsync(return : Return) : Task<bool>
+returnService -> returnService : CreateReturnObject(bookingId : Guid, inventoryNumber : string, staffId : Guid)\n: Return
+returnService -> database : BeginTransaction
+returnService -> returnRepository : AddAsync(returnToAdd : Return) : Task<bool>
 activate returnRepository
 returnRepository -> database : Spara återlämning i databasen
 activate database
@@ -90,16 +94,17 @@ database --> returnRepository : Resultatet av sparandet
 deactivate database
 
 alt registreringen misslyckades
-returnRepository --> service : return : false
-service -> database : Rollback
-service --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Registreringen av återlämningen misslyckades"}
+returnRepository --> returnService : success = false
+returnService -> database : Rollback
+returnService --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Registreringen av återlämningen misslyckades."}
 form --> user : Visa felmeddelande
 
 else registreringen lyckades
-returnRepository --> service : return : true
+returnRepository --> returnService : success = true
 deactivate returnRepository
 
-service -> bookingRepository : UpdateAsync(booking : Booking) : Task<bool>
+returnService -> returnService : UpdateBooking(booking : Booking) : Booking
+returnService -> bookingRepository : UpdateAsync(updatedBooking : Booking) : Task<bool>
 activate bookingRepository
 bookingRepository -> database : Uppdatera bokningen i databasen
 
@@ -108,17 +113,53 @@ database --> bookingRepository : Resultatet av uppdateringen
 deactivate database
 
 alt uppdateringen misslyckades
-bookingRepository --> service : return : false
-service -> database : Rollback
-service --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Uppdateringen av bokningen misslyckades"}
+bookingRepository --> returnService : success = false
+returnService -> database : Rollback
+returnService --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Uppdateringen av bokningen misslyckades."}
 form --> user : Visa felmeddelande
 
 else uppdateringen lyckades
-bookingRepository --> service : return : true
+bookingRepository --> returnService : success = true
 deactivate bookingRepository
-service -> database : Commit
-service --> form : new RegisterReturnResponse {\nSuccess = true,\nErrorMessage = null}
-deactivate service
+
+returnService -> equipmentRepository : GetEquipmentItemByInventoryNumberAsync(inventoryNumber : string)\n: EquipmentItem
+activate equipmentRepository
+equipmentRepository -> database : Hämta utrustningsexemplaret med inventarienummer
+activate database
+database --> equipmentRepository : Returnerar resultatet av hämtningen
+deactivate database
+
+alt exemplaret hittas inte
+equipmentRepository --> returnService : equipmentItem : null
+returnService --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = $"Utrustningsexemplar med inventarienummer '{inventoryNumber}' kunde inte hittas."}
+form --> user : Visa felmeddelande
+
+else exemplaret hittas
+equipmentRepository --> returnService : equipmentItem : EquipmentItem
+deactivate equipmentRepository
+
+returnService -> returnService : UpdateEquipmentItem(equipmentItem : EquipmentItem, isAvailable : bool)\n: EquipmentItem
+returnService -> equipmentRepository : UpdateAsync(updatedEquipmentItem : EquipmentItem) : Task<bool>
+activate equipmentRepository
+equipmentRepository -> database : Uppdatera utrustningsexemplaret i databasen
+
+activate database
+database --> equipmentRepository : Resultatet av uppdateringen
+deactivate database
+
+alt uppdateringen misslyckades
+equipmentRepository --> returnService : success = false
+returnService -> database : Rollback
+returnService --> form : new RegisterReturnResponse {\nSuccess = false,\nErrorMessage = "Uppdateringen av utrustningsexemplaret misslyckades."}
+form --> user : Visa felmeddelande
+
+else uppdateringen lyckades
+equipmentRepository --> returnService : success = true
+deactivate equipmentRepository
+
+returnService -> database : Commit
+returnService --> form : new RegisterReturnResponse {\nSuccess = true,\nErrorMessage = null}
+deactivate returnService
 form --> user : Visa bekräftelse av lyckad registrering
 end
 
