@@ -1,5 +1,4 @@
 @startuml register_return_activity_diagram
-@startuml registrer_return
 title Registrera återlämning
 
 start
