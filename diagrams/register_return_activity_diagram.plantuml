@@ -1,13 +1,22 @@
 @startuml register_return_activity_diagram
+@startuml registrer_return
 title Registrera återlämning
 
 start
 
-:Visa vald bokning och bokningsuppgifter;
-:Visa vilket exemplar som ska återlämnas
-och dess inventarienummer;
+:Hämta bokningen som ska återlämnas;
 
-if (Finns en pågående uthyrning?) then (JA)
+if (Boknigen hittades) then (JA)
+    :Visa vald bokning och bokningsuppgifter;
+    :Visa vilket exemplar som ska återlämnas
+    och dess inventarienummer;
+else (NEJ)
+    :Visa felmeddelande om att
+    bokningen inte kunde hittas;
+    end
+endif
+
+if (Finns en pågående uthyrning när bokningen visas?) then (JA)
     :Personal kontrollerar det
     återlämnade exemplaret;
 else (NEJ)
@@ -16,7 +25,7 @@ else (NEJ)
     end
 endif
 
-if (Inventarienummret stämmer) then (JA)
+if (Inventarienumret stämmer) then (JA)
     :Kontrollen av exemplaret är klar;
 else (NEJ)
     :Visa felmeddelande om fel exemplar;
@@ -27,7 +36,7 @@ endif
 if (Exemplaret är i godtagbart skick) then (JA)
     :Fortsätt återlämningsprocessen;
 else (NEJ)
-    :Anropa separat aktivitetsdiagram:
+    :Genomför separat aktivitetsdiagram:
     "Markera exemplar som otillgängligt";
     :Fortsätt återlämningsprocessen
     efter att otillgängligheten hanterats;
@@ -45,22 +54,25 @@ else (NEJ)
     end
 endif
 
-if (Uthyrningen är fortfarande aktiv) then (JA)
+if (Är uthyrningen fortfarande aktiv\n när återlämningen ska sparas?) then (JA)
     :Registrera återlämningen med koppling
     till exemplaret och personalen;
     :Avsluta den pågående uthyrningen;
     :Behåll det överenskomna bokningspriset;
+    :Uppdatera bokningens status;
+    :Updatera exemplaret som återlämnat och tillgängligt;
 else (NEJ)
     :Visa meddelande om att
     återlämningen redan registrerats;
     end
 endif
 
-if (Registreringen sparades) then (JA)
+if (Registreringen samt updateringarna av\nexemplaret och boknigen sparades) then (JA)
     :Visa bekräftelse av lyckad registrering av återlämning;
 else (NEJ)
     :Visa felmeddelande;
     :Återställ eventuella ofullständiga ändringar;
+    end
 endif
 
 stop
