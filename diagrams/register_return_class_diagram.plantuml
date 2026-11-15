@@ -2,6 +2,7 @@
 title Registrera återlämning
 
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 class Booking {
     +BookingId : Guid
@@ -74,8 +75,8 @@ interface IEquipmentItemRepository {
 
 interface IReturnService {
     +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
-    +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid, isAvailable : bool) : Task<RegisterReturnResponse>
+    +CheckInventoryNumber(inventoryNumber : string, booking : Booking) : CheckInventoryNumberResponse
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
 }
 
 class ReturnService {
@@ -86,9 +87,9 @@ class ReturnService {
     +ReturnService(returnRepository : IReturnRepository, bookingRepository : IBookingRepository, equipmentItemRepository : IEquipmentItemRepository)
 
     +GetBookingByIdAsync(bookingId : Guid) : Task<GetBookingResponse>
-    +CheckInventoryNumberAsync(inventoryNumber : string, booking : Booking, staffId : Guid) : Task<CheckInventoryNumberResponse>
-    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid, isAvailable : bool) : Task<RegisterReturnResponse>
-    -CreateReturnObject(booking : Booking, inventoryNumber : string, staffId : Guid) : Return
+    +CheckInventoryNumber(inventoryNumber : string, booking : Booking) : CheckInventoryNumberResponse
+    +RegisterReturnAsync(booking : Booking, inventoryNumber : string, staffId : Guid) : Task<RegisterReturnResponse>
+    -{static} CreateReturnObject(booking : Booking, inventoryNumber : string, staffId : Guid) : Return
     -{static} GenerateNewId() : Guid
     -{static} UpdateBooking(booking : Booking) : Booking
     -{static} UpdateEquipmentItem(equipmentItem : EquipmentItem, isAvailable : bool) : EquipmentItem
@@ -110,20 +111,20 @@ record RegisterReturnResponse {
     +ErrorMessage : string?
 }
 
-Return -> "1" Booking : <<uses>>
-Booking --> BookingStatus : <<uses>>
-Booking --> EquipmentItem : <<uses>>
-Booking --> Validation : <<uses>>
-Return --> Validation : <<uses>>
-EquipmentItem --> Validation : <<uses>>
-ReturnService --> Booking : <<uses>>
-ReturnService --> Return : <<uses>>
-ReturnService --> EquipmentItem : <<uses>>
+Return ..> Booking : <<uses>>
+Booking ..> BookingStatus : <<uses>>
+Booking ..> EquipmentItem : <<uses>>
+Booking..> Validation : <<uses>>
+Return ..> Validation : <<uses>>
+EquipmentItem ..> Validation : <<uses>>
+ReturnService ..> Booking : <<uses>>
+ReturnService ..> Return : <<uses>>
+ReturnService ..> EquipmentItem : <<uses>>
 ReturnService ..|> IReturnService : <<implements>>
-ReturnService --> "1" IBookingRepository : <<uses>>
-ReturnService --> "1" IReturnRepository : <<uses>>
-ReturnService --> "1" IEquipmentItemRepository : <<uses>>
-ReturnService --> GetBookingResponse : <<creates>>
-ReturnService --> CheckInventoryNumberResponse : <<creates>>
-ReturnService --> RegisterReturnResponse : <<creates>>
+ReturnService ..> "1" IBookingRepository : <<uses>>
+ReturnService ..> "1" IReturnRepository : <<uses>>
+ReturnService ..> "1" IEquipmentItemRepository : <<uses>>
+ReturnService ..> GetBookingResponse : <<creates>>
+ReturnService ..> CheckInventoryNumberResponse : <<creates>>
+ReturnService ..> RegisterReturnResponse : <<creates>>
 @enduml
