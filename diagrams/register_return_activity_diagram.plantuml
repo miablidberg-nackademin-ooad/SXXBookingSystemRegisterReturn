@@ -3,9 +3,17 @@ title Registrera återlämning
 
 start
 
-:Visa vald bokning och bokningsuppgifter;
-:Visa vilket exemplar som ska återlämnas
-och dess inventarienummer;
+:Hämta bokningen som ska återlämnas;
+
+if (Boknigen hittades) then (JA)
+    :Visa vald bokning och bokningsuppgifter;
+    :Visa vilket exemplar som ska återlämnas
+    och dess inventarienummer;
+else (NEJ)
+    :Visa felmeddelande om att
+    bokningen inte kunde hittas;
+    end
+endif
 
 if (Finns en pågående uthyrning när bokningen visas?) then (JA)
     :Personal kontrollerar det
@@ -50,17 +58,20 @@ if (Är uthyrningen fortfarande aktiv\n när återlämningen ska sparas?) then (
     till exemplaret och personalen;
     :Avsluta den pågående uthyrningen;
     :Behåll det överenskomna bokningspriset;
+    :Uppdatera bokningens status;
+    :Updatera exemplaret som återlämnat och tillgängligt;
 else (NEJ)
     :Visa meddelande om att
     återlämningen redan registrerats;
     end
 endif
 
-if (Registreringen sparades) then (JA)
+if (Registreringen samt updateringarna av\nexemplaret och boknigen sparades) then (JA)
     :Visa bekräftelse av lyckad registrering av återlämning;
 else (NEJ)
     :Visa felmeddelande;
     :Återställ eventuella ofullständiga ändringar;
+    end
 endif
 
 stop
